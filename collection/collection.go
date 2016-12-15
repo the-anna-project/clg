@@ -12,6 +12,7 @@ import (
 	"github.com/the-anna-project/clg/input"
 	"github.com/the-anna-project/clg/isbetween"
 	"github.com/the-anna-project/clg/isgreater"
+	"github.com/the-anna-project/clg/islesser"
 )
 
 // Config represents the configuration used to create a new CLG collection.
@@ -101,6 +102,16 @@ func New(config Config) (*Collection, error) {
 		}
 	}
 
+	var isLesserService clg.Service
+	{
+		isLesserConfig := islesser.DefaultConfig()
+		isLesserConfig.IDService = config.IDService
+		isLesserService, err = islesser.New(isLesserConfig)
+		if err != nil {
+			return nil, maskAny(err)
+		}
+	}
+
 	newCollection := &Collection{
 		// Internals.
 		bootOnce:     sync.Once{},
@@ -113,6 +124,7 @@ func New(config Config) (*Collection, error) {
 			inputService,
 			isBetweenService,
 			isGreaterService,
+			isLesserService,
 		},
 
 		Divide:    divideService,
@@ -120,6 +132,7 @@ func New(config Config) (*Collection, error) {
 		Input:     inputService,
 		IsBetween: isBetweenService,
 		IsGreater: isGreaterService,
+		IsLesser:  isLesserService,
 	}
 
 	return newCollection, nil
@@ -139,6 +152,7 @@ type Collection struct {
 	Input     clg.Service
 	IsBetween clg.Service
 	IsGreater clg.Service
+	IsLesser  clg.Service
 }
 
 func (c *Collection) Boot() {
