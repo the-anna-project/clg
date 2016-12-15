@@ -57,7 +57,7 @@ func New(config Config) (clg.Service, error) {
 		closer:   make(chan struct{}, 1),
 		metadata: map[string]string{
 			"id":   ID,
-			"kind": "greater",
+			"kind": "isbetween",
 			"name": "clg",
 			"type": "service",
 		},
