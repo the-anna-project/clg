@@ -48,7 +48,7 @@ func New(config Config) (clg.Service, error) {
 
 	ID, err := config.IDService.New()
 	if err != nil {
-		panic(err)
+		return nil, maskAny(err)
 	}
 
 	newService := &service{
