@@ -11,6 +11,7 @@ import (
 	"github.com/the-anna-project/clg/greater"
 	"github.com/the-anna-project/clg/input"
 	"github.com/the-anna-project/clg/isbetween"
+	"github.com/the-anna-project/clg/isgreater"
 )
 
 // Config represents the configuration used to create a new CLG collection.
@@ -80,11 +81,21 @@ func New(config Config) (*Collection, error) {
 		}
 	}
 
-	var isbetweenService clg.Service
+	var isBetweenService clg.Service
 	{
-		isbetweenConfig := isbetween.DefaultConfig()
-		isbetweenConfig.IDService = config.IDService
-		isbetweenService, err = isbetween.New(isbetweenConfig)
+		isBetweenConfig := isbetween.DefaultConfig()
+		isBetweenConfig.IDService = config.IDService
+		isBetweenService, err = isbetween.New(isBetweenConfig)
+		if err != nil {
+			return nil, maskAny(err)
+		}
+	}
+
+	var isGreaterService clg.Service
+	{
+		isGreaterConfig := isgreater.DefaultConfig()
+		isGreaterConfig.IDService = config.IDService
+		isGreaterService, err = isgreater.New(isGreaterConfig)
 		if err != nil {
 			return nil, maskAny(err)
 		}
@@ -96,10 +107,19 @@ func New(config Config) (*Collection, error) {
 		shutdownOnce: sync.Once{},
 
 		// Public.
+		List: []clg.Service{
+			divideService,
+			greaterService,
+			inputService,
+			isBetweenService,
+			isGreaterService,
+		},
+
 		Divide:    divideService,
 		Greater:   greaterService,
 		Input:     inputService,
-		IsBetween: isbetweenService,
+		IsBetween: isBetweenService,
+		IsGreater: isGreaterService,
 	}
 
 	return newCollection, nil
@@ -112,24 +132,20 @@ type Collection struct {
 	shutdownOnce sync.Once
 
 	// Public.
+	List []clg.Service
+
 	Divide    clg.Service
 	Greater   clg.Service
 	Input     clg.Service
 	IsBetween clg.Service
+	IsGreater clg.Service
 }
 
 func (c *Collection) Boot() {
 	c.bootOnce.Do(func() {
 		var wg sync.WaitGroup
 
-		list := []clg.Service{
-			c.Divide,
-			c.Greater,
-			c.Input,
-			c.IsBetween,
-		}
-
-		for _, s := range list {
+		for _, s := range c.List {
 			wg.Add(1)
 			go func() {
 				s.Boot()
@@ -145,14 +161,7 @@ func (c *Collection) Shutdown() {
 	c.shutdownOnce.Do(func() {
 		var wg sync.WaitGroup
 
-		list := []clg.Service{
-			c.Divide,
-			c.Greater,
-			c.Input,
-			c.IsBetween,
-		}
-
-		for _, s := range list {
+		for _, s := range c.List {
 			wg.Add(1)
 			go func() {
 				s.Shutdown()
