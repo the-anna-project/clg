@@ -14,6 +14,7 @@ import (
 	"github.com/the-anna-project/clg/isgreater"
 	"github.com/the-anna-project/clg/islesser"
 	"github.com/the-anna-project/clg/lesser"
+	"github.com/the-anna-project/clg/multiply"
 )
 
 // Config represents the configuration used to create a new CLG collection.
@@ -123,6 +124,16 @@ func New(config Config) (*Collection, error) {
 		}
 	}
 
+	var multiplyService clg.Service
+	{
+		multiplyConfig := multiply.DefaultConfig()
+		multiplyConfig.IDService = config.IDService
+		multiplyService, err = multiply.New(multiplyConfig)
+		if err != nil {
+			return nil, maskAny(err)
+		}
+	}
+
 	newCollection := &Collection{
 		// Internals.
 		bootOnce:     sync.Once{},
@@ -137,6 +148,7 @@ func New(config Config) (*Collection, error) {
 			isGreaterService,
 			isLesserService,
 			lesserService,
+			multiplyService,
 		},
 
 		Divide:    divideService,
@@ -146,6 +158,7 @@ func New(config Config) (*Collection, error) {
 		IsGreater: isGreaterService,
 		IsLesser:  isLesserService,
 		Lesser:    lesserService,
+		Multiply:  multiplyService,
 	}
 
 	return newCollection, nil
@@ -167,6 +180,7 @@ type Collection struct {
 	IsGreater clg.Service
 	IsLesser  clg.Service
 	Lesser    clg.Service
+	Multiply  clg.Service
 }
 
 func (c *Collection) Boot() {
