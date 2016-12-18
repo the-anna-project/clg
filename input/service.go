@@ -86,8 +86,8 @@ func New(config Config) (clg.Service, error) {
 		shutdownOnce: sync.Once{},
 
 		// Settings.
-		idService: config.IDService,
-		storage:   config.StorageCollection,
+		id:      config.IDService,
+		storage: config.StorageCollection,
 	}
 
 	return newService, nil
@@ -101,8 +101,8 @@ type service struct {
 	shutdownOnce sync.Once
 
 	// Dependencies.
-	idService id.Service
-	storage   *storagecollection.Collection
+	id      id.Service
+	storage *storagecollection.Collection
 }
 
 func (s *service) Action() interface{} {
@@ -112,9 +112,9 @@ func (s *service) Action() interface{} {
 		informationIDKey := fmt.Sprintf("information-sequence:%s:information-id", informationSequence)
 		informationID, err := s.storage.General.Get(informationIDKey)
 		if storageerror.IsNotFound(err) {
-			// The given information sequence was never seen before. Thus we register it
-			// now with its own very unique information ID.
-			newID, err := s.idService.New()
+			// The given information sequence was never seen before. Thus we register
+			// it now with its own very unique information ID.
+			newID, err := s.id.New()
 			if err != nil {
 				return maskAny(err)
 			}
