@@ -20,7 +20,8 @@ import (
 // Config represents the configuration used to create a new CLG collection.
 type Config struct {
 	// Dependencies.
-	IDService id.Service
+	IDService         id.Service
+	StorageCollection *storagecollection.Collection
 }
 
 // DefaultConfig provides a default configuration to create a new CLG collection
@@ -37,9 +38,19 @@ func DefaultConfig() Config {
 		}
 	}
 
+	var storageCollection *storagecollection.Collection
+	{
+		storageConfig := storagecollection.DefaultConfig()
+		storageCollection, err = storagecollection.New(storageConfig)
+		if err != nil {
+			panic(err)
+		}
+	}
+
 	config := Config{
 		// Dependencies.
-		IDService: idService,
+		IDService:         idService,
+		StorageCollection: storageCollection,
 	}
 
 	return config
@@ -50,6 +61,9 @@ func New(config Config) (*Collection, error) {
 	// Dependencies.
 	if config.IDService == nil {
 		return nil, maskAnyf(invalidConfigError, "ID service must not be empty")
+	}
+	if config.StorageCollection == nil {
+		return nil, maskAnyf(invalidConfigError, "storage collection must not be empty")
 	}
 
 	var err error
@@ -78,6 +92,7 @@ func New(config Config) (*Collection, error) {
 	{
 		inputConfig := input.DefaultConfig()
 		inputConfig.IDService = config.IDService
+		inputConfig.StorageCollection = config.StorageCollection
 		inputService, err = input.New(inputConfig)
 		if err != nil {
 			return nil, maskAny(err)
