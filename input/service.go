@@ -22,8 +22,8 @@ type ServiceConfig struct {
 	PeerCollection *peer.Collection
 }
 
-// DefaultServiceConfig provides a default configuration to create a new CLG service by
-// best effort.
+// DefaultServiceConfig provides a default configuration to create a new CLG
+// service by best effort.
 func DefaultServiceConfig() ServiceConfig {
 	var err error
 

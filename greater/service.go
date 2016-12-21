@@ -15,8 +15,8 @@ type ServiceConfig struct {
 	IDService id.Service
 }
 
-// DefaultServiceConfig provides a default configuration to create a new CLG service by
-// best effort.
+// DefaultServiceConfig provides a default configuration to create a new CLG
+// service by best effort.
 func DefaultServiceConfig() ServiceConfig {
 	var err error
 
