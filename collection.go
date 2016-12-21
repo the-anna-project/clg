@@ -1,12 +1,11 @@
-// Package collection provides a bundle of CLG services.
-package collection
+package clg
 
 import (
 	"sync"
 
 	"github.com/the-anna-project/id"
+	"github.com/the-anna-project/peer"
 
-	"github.com/the-anna-project/clg"
 	"github.com/the-anna-project/clg/divide"
 	"github.com/the-anna-project/clg/greater"
 	"github.com/the-anna-project/clg/input"
@@ -17,58 +16,59 @@ import (
 	"github.com/the-anna-project/clg/multiply"
 )
 
-// Config represents the configuration used to create a new CLG collection.
-type Config struct {
+// CollectionConfig represents the configuration used to create a new CLG
+// collection.
+type CollectionConfig struct {
 	// Dependencies.
-	IDService         id.Service
-	StorageCollection *storagecollection.Collection
+	IDService      id.Service
+	PeerCollection *peer.Collection
 }
 
-// DefaultConfig provides a default configuration to create a new CLG collection
-// by best effort.
-func DefaultConfig() Config {
+// DefaultCollectionConfig provides a default configuration to create a new CLG
+// collection by best effort.
+func DefaultCollectionConfig() CollectionConfig {
 	var err error
 
 	var idService id.Service
 	{
-		idConfig := id.DefaultConfig()
-		idService, err = id.New(idConfig)
+		idConfig := id.DefaultServiceConfig()
+		idService, err = id.NewService(idConfig)
 		if err != nil {
 			panic(err)
 		}
 	}
 
-	var storageCollection *storagecollection.Collection
+	var peerCollection *peer.Collection
 	{
-		storageConfig := storagecollection.DefaultConfig()
-		storageCollection, err = storagecollection.New(storageConfig)
+		peerConfig := peer.DefaultCollectionConfig()
+		peerCollection, err = peer.NewCollection(peerConfig)
 		if err != nil {
 			panic(err)
 		}
 	}
 
-	config := Config{
+	config := CollectionConfig{
 		// Dependencies.
-		IDService:         idService,
-		StorageCollection: storageCollection,
+		IDService:      idService,
+		PeerCollection: peerCollection,
 	}
 
 	return config
 }
 
-// New creates a new configured CLG Collection.
-func New(config Config) (*Collection, error) {
+// NewCollection creates a new configured CLG Collection.
+func NewCollection(config CollectionConfig) (*Collection, error) {
 	// Dependencies.
 	if config.IDService == nil {
 		return nil, maskAnyf(invalidConfigError, "ID service must not be empty")
 	}
-	if config.StorageCollection == nil {
-		return nil, maskAnyf(invalidConfigError, "storage collection must not be empty")
+	if config.PeerCollection == nil {
+		return nil, maskAnyf(invalidConfigError, "peer collection must not be empty")
 	}
 
 	var err error
 
-	var divideService clg.Service
+	var divideService Service
 	{
 		divideConfig := divide.DefaultConfig()
 		divideConfig.IDService = config.IDService
@@ -78,7 +78,7 @@ func New(config Config) (*Collection, error) {
 		}
 	}
 
-	var greaterService clg.Service
+	var greaterService Service
 	{
 		greaterConfig := greater.DefaultConfig()
 		greaterConfig.IDService = config.IDService
@@ -88,18 +88,18 @@ func New(config Config) (*Collection, error) {
 		}
 	}
 
-	var inputService clg.Service
+	var inputService Service
 	{
 		inputConfig := input.DefaultConfig()
 		inputConfig.IDService = config.IDService
-		inputConfig.StorageCollection = config.StorageCollection
+		inputConfig.PeerCollection = config.PeerCollection
 		inputService, err = input.New(inputConfig)
 		if err != nil {
 			return nil, maskAny(err)
 		}
 	}
 
-	var isBetweenService clg.Service
+	var isBetweenService Service
 	{
 		isBetweenConfig := isbetween.DefaultConfig()
 		isBetweenConfig.IDService = config.IDService
@@ -109,7 +109,7 @@ func New(config Config) (*Collection, error) {
 		}
 	}
 
-	var isGreaterService clg.Service
+	var isGreaterService Service
 	{
 		isGreaterConfig := isgreater.DefaultConfig()
 		isGreaterConfig.IDService = config.IDService
@@ -119,7 +119,7 @@ func New(config Config) (*Collection, error) {
 		}
 	}
 
-	var isLesserService clg.Service
+	var isLesserService Service
 	{
 		isLesserConfig := islesser.DefaultConfig()
 		isLesserConfig.IDService = config.IDService
@@ -129,7 +129,7 @@ func New(config Config) (*Collection, error) {
 		}
 	}
 
-	var lesserService clg.Service
+	var lesserService Service
 	{
 		lesserConfig := lesser.DefaultConfig()
 		lesserConfig.IDService = config.IDService
@@ -139,7 +139,7 @@ func New(config Config) (*Collection, error) {
 		}
 	}
 
-	var multiplyService clg.Service
+	var multiplyService Service
 	{
 		multiplyConfig := multiply.DefaultConfig()
 		multiplyConfig.IDService = config.IDService
@@ -155,7 +155,7 @@ func New(config Config) (*Collection, error) {
 		shutdownOnce: sync.Once{},
 
 		// Public.
-		List: []clg.Service{
+		List: []Service{
 			divideService,
 			greaterService,
 			inputService,
@@ -186,16 +186,16 @@ type Collection struct {
 	shutdownOnce sync.Once
 
 	// Public.
-	List []clg.Service
+	List []Service
 
-	Divide    clg.Service
-	Greater   clg.Service
-	Input     clg.Service
-	IsBetween clg.Service
-	IsGreater clg.Service
-	IsLesser  clg.Service
-	Lesser    clg.Service
-	Multiply  clg.Service
+	Divide    Service
+	Greater   Service
+	Input     Service
+	IsBetween Service
+	IsGreater Service
+	IsLesser  Service
+	Lesser    Service
+	Multiply  Service
 }
 
 func (c *Collection) Boot() {
