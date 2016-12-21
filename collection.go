@@ -70,9 +70,9 @@ func NewCollection(config CollectionConfig) (*Collection, error) {
 
 	var divideService Service
 	{
-		divideConfig := divide.DefaultConfig()
+		divideConfig := divide.DefaultServiceConfig()
 		divideConfig.IDService = config.IDService
-		divideService, err = divide.New(divideConfig)
+		divideService, err = divide.NewService(divideConfig)
 		if err != nil {
 			return nil, maskAny(err)
 		}
@@ -80,9 +80,9 @@ func NewCollection(config CollectionConfig) (*Collection, error) {
 
 	var greaterService Service
 	{
-		greaterConfig := greater.DefaultConfig()
+		greaterConfig := greater.DefaultServiceConfig()
 		greaterConfig.IDService = config.IDService
-		greaterService, err = greater.New(greaterConfig)
+		greaterService, err = greater.NewService(greaterConfig)
 		if err != nil {
 			return nil, maskAny(err)
 		}
@@ -90,10 +90,10 @@ func NewCollection(config CollectionConfig) (*Collection, error) {
 
 	var inputService Service
 	{
-		inputConfig := input.DefaultConfig()
+		inputConfig := input.DefaultServiceConfig()
 		inputConfig.IDService = config.IDService
 		inputConfig.PeerCollection = config.PeerCollection
-		inputService, err = input.New(inputConfig)
+		inputService, err = input.NewService(inputConfig)
 		if err != nil {
 			return nil, maskAny(err)
 		}
@@ -101,9 +101,9 @@ func NewCollection(config CollectionConfig) (*Collection, error) {
 
 	var isBetweenService Service
 	{
-		isBetweenConfig := isbetween.DefaultConfig()
+		isBetweenConfig := isbetween.DefaultServiceConfig()
 		isBetweenConfig.IDService = config.IDService
-		isBetweenService, err = isbetween.New(isBetweenConfig)
+		isBetweenService, err = isbetween.NewService(isBetweenConfig)
 		if err != nil {
 			return nil, maskAny(err)
 		}
@@ -111,9 +111,9 @@ func NewCollection(config CollectionConfig) (*Collection, error) {
 
 	var isGreaterService Service
 	{
-		isGreaterConfig := isgreater.DefaultConfig()
+		isGreaterConfig := isgreater.DefaultServiceConfig()
 		isGreaterConfig.IDService = config.IDService
-		isGreaterService, err = isgreater.New(isGreaterConfig)
+		isGreaterService, err = isgreater.NewService(isGreaterConfig)
 		if err != nil {
 			return nil, maskAny(err)
 		}
@@ -121,9 +121,9 @@ func NewCollection(config CollectionConfig) (*Collection, error) {
 
 	var isLesserService Service
 	{
-		isLesserConfig := islesser.DefaultConfig()
+		isLesserConfig := islesser.DefaultServiceConfig()
 		isLesserConfig.IDService = config.IDService
-		isLesserService, err = islesser.New(isLesserConfig)
+		isLesserService, err = islesser.NewService(isLesserConfig)
 		if err != nil {
 			return nil, maskAny(err)
 		}
@@ -131,9 +131,9 @@ func NewCollection(config CollectionConfig) (*Collection, error) {
 
 	var lesserService Service
 	{
-		lesserConfig := lesser.DefaultConfig()
+		lesserConfig := lesser.DefaultServiceConfig()
 		lesserConfig.IDService = config.IDService
-		lesserService, err = lesser.New(lesserConfig)
+		lesserService, err = lesser.NewService(lesserConfig)
 		if err != nil {
 			return nil, maskAny(err)
 		}
@@ -141,9 +141,9 @@ func NewCollection(config CollectionConfig) (*Collection, error) {
 
 	var multiplyService Service
 	{
-		multiplyConfig := multiply.DefaultConfig()
+		multiplyConfig := multiply.DefaultServiceConfig()
 		multiplyConfig.IDService = config.IDService
-		multiplyService, err = multiply.New(multiplyConfig)
+		multiplyService, err = multiply.NewService(multiplyConfig)
 		if err != nil {
 			return nil, maskAny(err)
 		}

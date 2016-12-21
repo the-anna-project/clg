@@ -49,7 +49,7 @@ func Test_Service_Action(t *testing.T) {
 		},
 	}
 
-	newService, err := New(DefaultConfig())
+	newService, err := NewService(DefaultServiceConfig())
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}

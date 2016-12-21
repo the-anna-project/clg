@@ -7,31 +7,29 @@ import (
 
 	"github.com/the-anna-project/context"
 	"github.com/the-anna-project/id"
-
-	"github.com/the-anna-project/clg"
 )
 
-// Config represents the configuration used to create a new CLG service.
-type Config struct {
+// ServiceConfig represents the configuration used to create a new CLG service.
+type ServiceConfig struct {
 	// Dependencies.
 	IDService id.Service
 }
 
-// DefaultConfig provides a default configuration to create a new CLG service by
+// DefaultServiceConfig provides a default configuration to create a new CLG service by
 // best effort.
-func DefaultConfig() Config {
+func DefaultServiceConfig() ServiceConfig {
 	var err error
 
 	var idService id.Service
 	{
-		idConfig := id.DefaultConfig()
-		idService, err = id.New(idConfig)
+		idConfig := id.DefaultServiceConfig()
+		idService, err = id.NewService(idConfig)
 		if err != nil {
 			panic(err)
 		}
 	}
 
-	config := Config{
+	config := ServiceConfig{
 		// Dependencies.
 		IDService: idService,
 	}
@@ -39,8 +37,8 @@ func DefaultConfig() Config {
 	return config
 }
 
-// New creates a new configured CLG service.
-func New(config Config) (clg.Service, error) {
+// NewService creates a new configured CLG service.
+func NewService(config ServiceConfig) (*Service, error) {
 	// Dependencies.
 	if config.IDService == nil {
 		return nil, maskAnyf(invalidConfigError, "ID service must not be empty")
@@ -51,7 +49,7 @@ func New(config Config) (clg.Service, error) {
 		return nil, maskAny(err)
 	}
 
-	newService := &service{
+	newService := &Service{
 		// Internals.
 		bootOnce: sync.Once{},
 		closer:   make(chan struct{}, 1),
@@ -67,7 +65,7 @@ func New(config Config) (clg.Service, error) {
 	return newService, nil
 }
 
-type service struct {
+type Service struct {
 	// Internals.
 	bootOnce     sync.Once
 	closer       chan struct{}
@@ -75,19 +73,19 @@ type service struct {
 	shutdownOnce sync.Once
 }
 
-func (s *service) Action() interface{} {
+func (s *Service) Action() interface{} {
 	return func(ctx context.Context, a, b float64) float64 {
 		return a * b
 	}
 }
 
-func (s *service) Boot() {
+func (s *Service) Boot() {
 	s.bootOnce.Do(func() {
 		// Service specific boot logic goes here.
 	})
 }
 
-func (s *service) Metadata() map[string]string {
+func (s *Service) Metadata() map[string]string {
 	m := map[string]string{}
 	for k, v := range s.metadata {
 		m[k] = v
@@ -95,7 +93,7 @@ func (s *service) Metadata() map[string]string {
 	return m
 }
 
-func (s *service) Shutdown() {
+func (s *Service) Shutdown() {
 	s.shutdownOnce.Do(func() {
 		close(s.closer)
 	})
