@@ -1,20 +1,18 @@
 // Package input implements github.com/the-anna-project/clg.Service and provides
-// the entry to the neural network. When being executed the CLGs action fetches
-// the information ID associated with the given information sequence. In case
-// the information sequence is not found within the underlying storage, a new
-// information ID is generated and used to store the given information sequence.
-// In any case the information ID is added to the given context.
+// the entry to the neural network. When being executed the CLGs action tries to
+// lookup the information peer associated with the given information sequence.
+// In case the information peer cannot be found within the connection space, a
+// new information peer is created. In any case the ID of the information peer
+// is added to the given context. Further CLGs may or may not make use of it.
 package input
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/the-anna-project/context"
 	informationid "github.com/the-anna-project/context/information/id"
 	"github.com/the-anna-project/id"
-	storagecollection "github.com/the-anna-project/storage/collection"
-	storageerror "github.com/the-anna-project/storage/error"
+	"github.com/the-anna-project/peer"
 
 	"github.com/the-anna-project/clg"
 )
@@ -22,8 +20,8 @@ import (
 // Config represents the configuration used to create a new CLG service.
 type Config struct {
 	// Dependencies.
-	IDService         id.Service
-	StorageCollection *storagecollection.Collection
+	IDService      id.Service
+	PeerCollection *peer.Collection
 }
 
 // DefaultConfig provides a default configuration to create a new CLG service by
@@ -33,17 +31,17 @@ func DefaultConfig() Config {
 
 	var idService id.Service
 	{
-		idConfig := id.DefaultConfig()
-		idService, err = id.New(idConfig)
+		idConfig := id.DefaultServiceConfig()
+		idService, err = id.NewService(idConfig)
 		if err != nil {
 			panic(err)
 		}
 	}
 
-	var storageCollection *storagecollection.Collection
+	var peerCollection *peer.Collection
 	{
-		storageConfig := storagecollection.DefaultConfig()
-		storageCollection, err = storagecollection.New(storageConfig)
+		peerConfig := peer.DefaultCollectionConfig()
+		peerCollection, err = peer.NewCollection(peerConfig)
 		if err != nil {
 			panic(err)
 		}
@@ -51,8 +49,8 @@ func DefaultConfig() Config {
 
 	config := Config{
 		// Dependencies.
-		IDService:         idService,
-		StorageCollection: storageCollection,
+		IDService:      idService,
+		PeerCollection: peerCollection,
 	}
 
 	return config
@@ -64,8 +62,8 @@ func New(config Config) (clg.Service, error) {
 	if config.IDService == nil {
 		return nil, maskAnyf(invalidConfigError, "ID service must not be empty")
 	}
-	if config.StorageCollection == nil {
-		return nil, maskAnyf(invalidConfigError, "storage collection must not be empty")
+	if config.PeerCollection == nil {
+		return nil, maskAnyf(invalidConfigError, "peer collection must not be empty")
 	}
 
 	ID, err := config.IDService.New()
@@ -86,8 +84,7 @@ func New(config Config) (clg.Service, error) {
 		shutdownOnce: sync.Once{},
 
 		// Settings.
-		id:      config.IDService,
-		storage: config.StorageCollection,
+		peer: config.PeerCollection,
 	}
 
 	return newService, nil
@@ -101,32 +98,16 @@ type service struct {
 	shutdownOnce sync.Once
 
 	// Dependencies.
-	id      id.Service
-	storage *storagecollection.Collection
+	peer *peer.Collection
 }
 
 func (s *service) Action() interface{} {
 	return func(ctx context.Context, informationSequence string) error {
-		// TODO there should be a service to manage information sequences and
-		// information IDs etc.
-		informationIDKey := fmt.Sprintf("information-sequence:%s:information-id", informationSequence)
-		informationID, err := s.storage.General.Get(informationIDKey)
-		if storageerror.IsNotFound(err) {
+		informationPeer, err := s.peer.Information.Search(informationSequence)
+		if peer.IsNotFound(err) {
 			// The given information sequence was never seen before. Thus we register
-			// it now with its own very unique information ID.
-			newID, err := s.id.New()
-			if err != nil {
-				return maskAny(err)
-			}
-			informationID = string(newID)
-
-			err = s.storage.General.Set(informationIDKey, informationID)
-			if err != nil {
-				return maskAny(err)
-			}
-
-			informationSequenceKey := fmt.Sprintf("information-id:%s:information-sequence", informationID)
-			err = s.storage.General.Set(informationSequenceKey, informationSequence)
+			// it now by creating an information peer for it.
+			informationPeer, err = s.peer.Information.Create(informationSequence)
 			if err != nil {
 				return maskAny(err)
 			}
@@ -134,7 +115,7 @@ func (s *service) Action() interface{} {
 			return maskAny(err)
 		}
 
-		ctx = informationid.NewContext(ctx, informationID)
+		ctx = informationid.NewContext(ctx, informationPeer.ID())
 
 		return nil
 	}
