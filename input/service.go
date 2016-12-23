@@ -3,14 +3,15 @@
 // lookup the information peer associated with the given information sequence.
 // In case the information peer cannot be found within the connection space, a
 // new information peer is created. In any case the ID of the information peer
-// is added to the given context. Further CLGs may or may not make use of it.
+// is added to the given context and can be accessed as first information ID of
+// the current CLG tree. Further CLGs may or may not make use of it.
 package input
 
 import (
 	"sync"
 
 	"github.com/the-anna-project/context"
-	informationid "github.com/the-anna-project/context/information/id"
+	firstinformationid "github.com/the-anna-project/context/first/information/id"
 	"github.com/the-anna-project/id"
 	"github.com/the-anna-project/peer"
 )
@@ -70,6 +71,9 @@ func NewService(config ServiceConfig) (*Service, error) {
 	}
 
 	newService := &Service{
+		// Dependencies.
+		peer: config.PeerCollection,
+
 		// Internals.
 		bootOnce: sync.Once{},
 		closer:   make(chan struct{}, 1),
@@ -80,23 +84,20 @@ func NewService(config ServiceConfig) (*Service, error) {
 			"type": "service",
 		},
 		shutdownOnce: sync.Once{},
-
-		// Settings.
-		peer: config.PeerCollection,
 	}
 
 	return newService, nil
 }
 
 type Service struct {
+	// Dependencies.
+	peer *peer.Collection
+
 	// Internals.
 	bootOnce     sync.Once
 	closer       chan struct{}
 	metadata     map[string]string
 	shutdownOnce sync.Once
-
-	// Dependencies.
-	peer *peer.Collection
 }
 
 func (s *Service) Action() interface{} {
@@ -113,7 +114,7 @@ func (s *Service) Action() interface{} {
 			return maskAny(err)
 		}
 
-		ctx = informationid.NewContext(ctx, informationPeer.ID())
+		ctx = firstinformationid.NewContext(ctx, informationPeer.ID())
 
 		return nil
 	}
