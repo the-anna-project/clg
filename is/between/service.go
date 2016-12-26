@@ -1,7 +1,6 @@
-// Package isgreater implements github.com/the-anna-project/clg.Service and
-// provides a method to identify if the first given number is greater than the
-// later.
-package isgreater
+// Package between implements github.com/the-anna-project/clg.Service and
+// provides a method to identify if a given number is between a given range.
+package between
 
 import (
 	"sync"
@@ -56,7 +55,7 @@ func NewService(config ServiceConfig) (*Service, error) {
 		closer:   make(chan struct{}, 1),
 		metadata: map[string]string{
 			"id":   ID,
-			"kind": "isgreater",
+			"kind": "is/between",
 			"name": "clg",
 			"type": "service",
 		},
@@ -75,8 +74,14 @@ type Service struct {
 }
 
 func (s *Service) Action() interface{} {
-	return func(ctx context.Context, a, b float64) bool {
-		return a > b
+	return func(ctx context.Context, n, min, max float64) bool {
+		if n < min {
+			return false
+		}
+		if n > max {
+			return false
+		}
+		return true
 	}
 }
 

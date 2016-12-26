@@ -1,4 +1,4 @@
-package isbetween
+package between
 
 import (
 	"fmt"

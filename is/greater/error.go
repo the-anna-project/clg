@@ -1,4 +1,4 @@
-package isgreater
+package greater
 
 import (
 	"fmt"

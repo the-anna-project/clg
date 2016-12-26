@@ -1,7 +1,7 @@
-// Package islesser implements github.com/the-anna-project/clg.Service and
+// Package lesser implements github.com/the-anna-project/clg.Service and
 // provides a method to identify if the first given number is lesser than the
 // later.
-package islesser
+package lesser
 
 import (
 	"sync"
@@ -56,7 +56,7 @@ func NewService(config ServiceConfig) (*Service, error) {
 		closer:   make(chan struct{}, 1),
 		metadata: map[string]string{
 			"id":   ID,
-			"kind": "islesser",
+			"kind": "is/lesser",
 			"name": "clg",
 			"type": "service",
 		},

@@ -1,4 +1,4 @@
-package islesser
+package lesser
 
 import (
 	"testing"
