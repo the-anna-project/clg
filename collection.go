@@ -17,6 +17,7 @@ import (
 	lesserclg "github.com/the-anna-project/clg/lesser"
 	multiplyclg "github.com/the-anna-project/clg/multiply"
 	outputclg "github.com/the-anna-project/clg/output"
+	subtractclg "github.com/the-anna-project/clg/subtract"
 	sumclg "github.com/the-anna-project/clg/sum"
 )
 
@@ -194,6 +195,16 @@ func NewCollection(config CollectionConfig) (*Collection, error) {
 		}
 	}
 
+	var subtractService Service
+	{
+		subtractConfig := subtractclg.DefaultServiceConfig()
+		subtractConfig.IDService = config.IDService
+		subtractService, err = subtractclg.NewService(subtractConfig)
+		if err != nil {
+			return nil, maskAny(err)
+		}
+	}
+
 	var sumService Service
 	{
 		sumConfig := sumclg.DefaultServiceConfig()
@@ -220,6 +231,7 @@ func NewCollection(config CollectionConfig) (*Collection, error) {
 			lesserService,
 			multiplyService,
 			outputService,
+			subtractService,
 			sumService,
 		},
 
@@ -232,6 +244,7 @@ func NewCollection(config CollectionConfig) (*Collection, error) {
 		Lesser:    lesserService,
 		Multiply:  multiplyService,
 		Output:    outputService,
+		Subtract:  subtractService,
 		Sum:       sumService,
 	}
 
@@ -256,6 +269,7 @@ type Collection struct {
 	Lesser    Service
 	Multiply  Service
 	Output    Service
+	Subtract  Service
 	Sum       Service
 }
 
