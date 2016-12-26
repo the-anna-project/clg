@@ -6,14 +6,26 @@ go:
 - 1.7
 
 install:
-  - go get -d -v ./...
+  - go get -d -t -v ./...
   - go build ./...
 
-# Travis CI executes go test by default in case there is no script phase
-# defined. Therefore we need to define something to not run tests, because there
-# are none.
 script:
-- echo "no tests to run"
+- go test -race -covermode=atomic -coverprofile=divide.txt ./divide
+- cat divide.txt >> coverage.txt
+- go test -race -covermode=atomic -coverprofile=greater.txt ./greater
+- cat greater.txt >> coverage.txt
+- go test -race -covermode=atomic -coverprofile=isbetween.txt ./is/between
+- cat isbetween.txt >> coverage.txt
+- go test -race -covermode=atomic -coverprofile=isgreater.txt ./is/greater
+- cat isgreater.txt >> coverage.txt
+- go test -race -covermode=atomic -coverprofile=islesser.txt ./is/lesser
+- cat islesser.txt >> coverage.txt
+- go test -race -covermode=atomic -coverprofile=lesser.txt ./lesser
+- cat lesser.txt >> coverage.txt
+- go test -race -covermode=atomic -coverprofile=multiply.txt ./multiply
+- cat multiply.txt >> coverage.txt
+- go test -race -covermode=atomic -coverprofile=sum.txt ./sum
+- cat sum.txt >> coverage.txt
 
 notifications:
   email: false
