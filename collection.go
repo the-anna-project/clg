@@ -17,6 +17,7 @@ import (
 	lesserclg "github.com/the-anna-project/clg/lesser"
 	multiplyclg "github.com/the-anna-project/clg/multiply"
 	outputclg "github.com/the-anna-project/clg/output"
+	roundclg "github.com/the-anna-project/clg/round"
 	subtractclg "github.com/the-anna-project/clg/subtract"
 	sumclg "github.com/the-anna-project/clg/sum"
 )
@@ -195,6 +196,16 @@ func NewCollection(config CollectionConfig) (*Collection, error) {
 		}
 	}
 
+	var roundService Service
+	{
+		roundConfig := roundclg.DefaultServiceConfig()
+		roundConfig.IDService = config.IDService
+		roundService, err = roundclg.NewService(roundConfig)
+		if err != nil {
+			return nil, maskAny(err)
+		}
+	}
+
 	var subtractService Service
 	{
 		subtractConfig := subtractclg.DefaultServiceConfig()
@@ -231,6 +242,7 @@ func NewCollection(config CollectionConfig) (*Collection, error) {
 			lesserService,
 			multiplyService,
 			outputService,
+			roundService,
 			subtractService,
 			sumService,
 		},
@@ -244,6 +256,7 @@ func NewCollection(config CollectionConfig) (*Collection, error) {
 		Lesser:    lesserService,
 		Multiply:  multiplyService,
 		Output:    outputService,
+		Round:     roundService,
 		Subtract:  subtractService,
 		Sum:       sumService,
 	}
@@ -269,6 +282,7 @@ type Collection struct {
 	Lesser    Service
 	Multiply  Service
 	Output    Service
+	Round     Service
 	Subtract  Service
 	Sum       Service
 }
