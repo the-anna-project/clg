@@ -24,6 +24,10 @@ script:
 - cat lesser.txt >> coverage.txt
 - go test -race -covermode=atomic -coverprofile=multiply.txt ./multiply
 - cat multiply.txt >> coverage.txt
+- go test -race -covermode=atomic -coverprofile=round.txt ./round
+- cat round.txt >> coverage.txt
+- go test -race -covermode=atomic -coverprofile=subtract.txt ./subtract
+- cat subtract.txt >> coverage.txt
 - go test -race -covermode=atomic -coverprofile=sum.txt ./sum
 - cat sum.txt >> coverage.txt
 
