@@ -1,9 +1,10 @@
-// Package islesser implements github.com/the-anna-project/clg.Service and
-// provides a method to identify if the first given number is lesser than the
-// later.
-package islesser
+// Package round implements github.com/the-anna-project/clg.Service and provides
+// a method to round the given number using the given precision.
+package round
 
 import (
+	"fmt"
+	"strconv"
 	"sync"
 
 	"github.com/the-anna-project/context"
@@ -56,7 +57,7 @@ func NewService(config ServiceConfig) (*Service, error) {
 		closer:   make(chan struct{}, 1),
 		metadata: map[string]string{
 			"id":   ID,
-			"kind": "islesser",
+			"kind": "round",
 			"name": "clg",
 			"type": "service",
 		},
@@ -75,8 +76,13 @@ type Service struct {
 }
 
 func (s *Service) Action() interface{} {
-	return func(ctx context.Context, a, b float64) bool {
-		return a < b
+	return func(ctx context.Context, f float64, p int) (float64, error) {
+		rounded, err := strconv.ParseFloat(fmt.Sprintf(fmt.Sprintf("%%.%df", p), f), 64)
+		if err != nil {
+			return 0, maskAny(err)
+		}
+
+		return rounded, nil
 	}
 }
 

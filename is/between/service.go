@@ -1,6 +1,6 @@
-// Package isbetween implements github.com/the-anna-project/clg.Service and
+// Package between implements github.com/the-anna-project/clg.Service and
 // provides a method to identify if a given number is between a given range.
-package isbetween
+package between
 
 import (
 	"sync"
@@ -55,7 +55,7 @@ func NewService(config ServiceConfig) (*Service, error) {
 		closer:   make(chan struct{}, 1),
 		metadata: map[string]string{
 			"id":   ID,
-			"kind": "isbetween",
+			"kind": "is/between",
 			"name": "clg",
 			"type": "service",
 		},

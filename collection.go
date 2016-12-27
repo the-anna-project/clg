@@ -11,12 +11,15 @@ import (
 	divideclg "github.com/the-anna-project/clg/divide"
 	greaterclg "github.com/the-anna-project/clg/greater"
 	inputclg "github.com/the-anna-project/clg/input"
-	isbetweenclg "github.com/the-anna-project/clg/isbetween"
-	isgreaterclg "github.com/the-anna-project/clg/isgreater"
-	islesserclg "github.com/the-anna-project/clg/islesser"
+	isbetweenclg "github.com/the-anna-project/clg/is/between"
+	isgreaterclg "github.com/the-anna-project/clg/is/greater"
+	islesserclg "github.com/the-anna-project/clg/is/lesser"
 	lesserclg "github.com/the-anna-project/clg/lesser"
 	multiplyclg "github.com/the-anna-project/clg/multiply"
 	outputclg "github.com/the-anna-project/clg/output"
+	roundclg "github.com/the-anna-project/clg/round"
+	subtractclg "github.com/the-anna-project/clg/subtract"
+	sumclg "github.com/the-anna-project/clg/sum"
 )
 
 // CollectionConfig represents the configuration used to create a new CLG
@@ -193,6 +196,36 @@ func NewCollection(config CollectionConfig) (*Collection, error) {
 		}
 	}
 
+	var roundService Service
+	{
+		roundConfig := roundclg.DefaultServiceConfig()
+		roundConfig.IDService = config.IDService
+		roundService, err = roundclg.NewService(roundConfig)
+		if err != nil {
+			return nil, maskAny(err)
+		}
+	}
+
+	var subtractService Service
+	{
+		subtractConfig := subtractclg.DefaultServiceConfig()
+		subtractConfig.IDService = config.IDService
+		subtractService, err = subtractclg.NewService(subtractConfig)
+		if err != nil {
+			return nil, maskAny(err)
+		}
+	}
+
+	var sumService Service
+	{
+		sumConfig := sumclg.DefaultServiceConfig()
+		sumConfig.IDService = config.IDService
+		sumService, err = sumclg.NewService(sumConfig)
+		if err != nil {
+			return nil, maskAny(err)
+		}
+	}
+
 	newCollection := &Collection{
 		// Internals.
 		bootOnce:     sync.Once{},
@@ -209,6 +242,9 @@ func NewCollection(config CollectionConfig) (*Collection, error) {
 			lesserService,
 			multiplyService,
 			outputService,
+			roundService,
+			subtractService,
+			sumService,
 		},
 
 		Divide:    divideService,
@@ -220,6 +256,9 @@ func NewCollection(config CollectionConfig) (*Collection, error) {
 		Lesser:    lesserService,
 		Multiply:  multiplyService,
 		Output:    outputService,
+		Round:     roundService,
+		Subtract:  subtractService,
+		Sum:       sumService,
 	}
 
 	return newCollection, nil
@@ -243,6 +282,9 @@ type Collection struct {
 	Lesser    Service
 	Multiply  Service
 	Output    Service
+	Round     Service
+	Subtract  Service
+	Sum       Service
 }
 
 func (c *Collection) Boot() {

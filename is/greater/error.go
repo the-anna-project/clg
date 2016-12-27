@@ -1,4 +1,4 @@
-package isbetween
+package greater
 
 import (
 	"fmt"

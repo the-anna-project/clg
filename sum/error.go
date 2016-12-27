@@ -1,4 +1,4 @@
-package isgreater
+package sum
 
 import (
 	"fmt"
