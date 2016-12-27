@@ -5,8 +5,10 @@ import (
 
 	"github.com/the-anna-project/event"
 	"github.com/the-anna-project/id"
+	"github.com/the-anna-project/index"
 	"github.com/the-anna-project/output"
 	"github.com/the-anna-project/peer"
+	"github.com/the-anna-project/random"
 
 	divideclg "github.com/the-anna-project/clg/divide"
 	greaterclg "github.com/the-anna-project/clg/greater"
@@ -17,6 +19,7 @@ import (
 	lesserclg "github.com/the-anna-project/clg/lesser"
 	multiplyclg "github.com/the-anna-project/clg/multiply"
 	outputclg "github.com/the-anna-project/clg/output"
+	readseparatorclg "github.com/the-anna-project/clg/read/separator"
 	roundclg "github.com/the-anna-project/clg/round"
 	subtractclg "github.com/the-anna-project/clg/subtract"
 	sumclg "github.com/the-anna-project/clg/sum"
@@ -28,8 +31,10 @@ type CollectionConfig struct {
 	// Dependencies.
 	EventCollection  *event.Collection
 	IDService        id.Service
+	IndexService     index.Service
 	OutputCollection *output.Collection
 	PeerCollection   *peer.Collection
+	RandomService    random.Service
 }
 
 // DefaultCollectionConfig provides a default configuration to create a new CLG
@@ -55,6 +60,15 @@ func DefaultCollectionConfig() CollectionConfig {
 		}
 	}
 
+	var indexService index.Service
+	{
+		indexConfig := index.DefaultServiceConfig()
+		indexService, err = index.NewService(indexConfig)
+		if err != nil {
+			panic(err)
+		}
+	}
+
 	var outputCollection *output.Collection
 	{
 		outputConfig := output.DefaultCollectionConfig()
@@ -73,12 +87,23 @@ func DefaultCollectionConfig() CollectionConfig {
 		}
 	}
 
+	var randomService random.Service
+	{
+		randomConfig := random.DefaultServiceConfig()
+		randomService, err = random.NewService(randomConfig)
+		if err != nil {
+			panic(err)
+		}
+	}
+
 	config := CollectionConfig{
 		// Dependencies.
 		EventCollection:  eventCollection,
 		IDService:        idService,
+		IndexService:     indexService,
 		OutputCollection: outputCollection,
 		PeerCollection:   peerCollection,
+		RandomService:    randomService,
 	}
 
 	return config
@@ -93,11 +118,17 @@ func NewCollection(config CollectionConfig) (*Collection, error) {
 	if config.IDService == nil {
 		return nil, maskAnyf(invalidConfigError, "ID service must not be empty")
 	}
+	if config.IndexService == nil {
+		return nil, maskAnyf(invalidConfigError, "index service must not be empty")
+	}
 	if config.OutputCollection == nil {
 		return nil, maskAnyf(invalidConfigError, "output collection must not be empty")
 	}
 	if config.PeerCollection == nil {
 		return nil, maskAnyf(invalidConfigError, "peer collection must not be empty")
+	}
+	if config.RandomService == nil {
+		return nil, maskAnyf(invalidConfigError, "random service must not be empty")
 	}
 
 	var err error
@@ -196,6 +227,19 @@ func NewCollection(config CollectionConfig) (*Collection, error) {
 		}
 	}
 
+	var readSeparatorService Service
+	{
+		readSeparatorConfig := readseparatorclg.DefaultServiceConfig()
+		readSeparatorConfig.IDService = config.IDService
+		readSeparatorConfig.IndexService = config.IndexService
+		readSeparatorConfig.PeerCollection = config.PeerCollection
+		readSeparatorConfig.RandomService = config.RandomService
+		readSeparatorService, err = readseparatorclg.NewService(readSeparatorConfig)
+		if err != nil {
+			return nil, maskAny(err)
+		}
+	}
+
 	var roundService Service
 	{
 		roundConfig := roundclg.DefaultServiceConfig()
@@ -242,23 +286,25 @@ func NewCollection(config CollectionConfig) (*Collection, error) {
 			lesserService,
 			multiplyService,
 			outputService,
+			readSeparatorService,
 			roundService,
 			subtractService,
 			sumService,
 		},
 
-		Divide:    divideService,
-		Greater:   greaterService,
-		Input:     inputService,
-		IsBetween: isBetweenService,
-		IsGreater: isGreaterService,
-		IsLesser:  isLesserService,
-		Lesser:    lesserService,
-		Multiply:  multiplyService,
-		Output:    outputService,
-		Round:     roundService,
-		Subtract:  subtractService,
-		Sum:       sumService,
+		Divide:        divideService,
+		Greater:       greaterService,
+		Input:         inputService,
+		IsBetween:     isBetweenService,
+		IsGreater:     isGreaterService,
+		IsLesser:      isLesserService,
+		Lesser:        lesserService,
+		Multiply:      multiplyService,
+		Output:        outputService,
+		ReadSeparator: readSeparatorService,
+		Round:         roundService,
+		Subtract:      subtractService,
+		Sum:           sumService,
 	}
 
 	return newCollection, nil
@@ -273,18 +319,19 @@ type Collection struct {
 	// Public.
 	List []Service
 
-	Divide    Service
-	Greater   Service
-	Input     Service
-	IsBetween Service
-	IsGreater Service
-	IsLesser  Service
-	Lesser    Service
-	Multiply  Service
-	Output    Service
-	Round     Service
-	Subtract  Service
-	Sum       Service
+	Divide        Service
+	Greater       Service
+	Input         Service
+	IsBetween     Service
+	IsGreater     Service
+	IsLesser      Service
+	Lesser        Service
+	Multiply      Service
+	Output        Service
+	ReadSeparator Service
+	Round         Service
+	Subtract      Service
+	Sum           Service
 }
 
 func (c *Collection) Boot() {
