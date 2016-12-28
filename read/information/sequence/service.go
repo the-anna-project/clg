@@ -1,9 +1,9 @@
-// Package id implements github.com/the-anna-project/clg.Service and provides
-// functionality to read the information sequence stored under a specific
-// information ID. The provided information ID in fact is an information peer
-// ID. The associated information sequence is stored as peer value within the
-// information peer.
-package id
+// Package sequence implements github.com/the-anna-project/clg.Service and
+// provides functionality to read the information sequence stored under a
+// provided information ID. The provided information ID in fact is an
+// information peer ID. The associated information sequence is stored as peer
+// value within the information peer.
+package sequence
 
 import (
 	"sync"
@@ -76,7 +76,7 @@ func NewService(config ServiceConfig) (*Service, error) {
 		closer:   make(chan struct{}, 1),
 		metadata: map[string]string{
 			"id":   ID,
-			"kind": "read/information/id",
+			"kind": "read/information/sequence",
 			"name": "clg",
 			"type": "service",
 		},

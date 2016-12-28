@@ -19,7 +19,7 @@ import (
 	lesserclg "github.com/the-anna-project/clg/lesser"
 	multiplyclg "github.com/the-anna-project/clg/multiply"
 	outputclg "github.com/the-anna-project/clg/output"
-	readinformationid "github.com/the-anna-project/clg/read/information/id"
+	readinformationsequence "github.com/the-anna-project/clg/read/information/sequence"
 	readseparatorclg "github.com/the-anna-project/clg/read/separator"
 	roundclg "github.com/the-anna-project/clg/round"
 	subtractclg "github.com/the-anna-project/clg/subtract"
@@ -228,12 +228,12 @@ func NewCollection(config CollectionConfig) (*Collection, error) {
 		}
 	}
 
-	var readInformationIDService Service
+	var readInformationSequenceService Service
 	{
-		readInformationIDConfig := readinformationid.DefaultServiceConfig()
-		readInformationIDConfig.IDService = config.IDService
-		readInformationIDConfig.PeerCollection = config.PeerCollection
-		readInformationIDService, err = readinformationid.NewService(readInformationIDConfig)
+		readInformationSequenceConfig := readinformationsequence.DefaultServiceConfig()
+		readInformationSequenceConfig.IDService = config.IDService
+		readInformationSequenceConfig.PeerCollection = config.PeerCollection
+		readInformationSequenceService, err = readinformationsequence.NewService(readInformationSequenceConfig)
 		if err != nil {
 			return nil, maskAny(err)
 		}
@@ -298,27 +298,27 @@ func NewCollection(config CollectionConfig) (*Collection, error) {
 			lesserService,
 			multiplyService,
 			outputService,
-			readInformationIDService,
+			readInformationSequenceService,
 			readSeparatorService,
 			roundService,
 			subtractService,
 			sumService,
 		},
 
-		Divide:            divideService,
-		Greater:           greaterService,
-		Input:             inputService,
-		IsBetween:         isBetweenService,
-		IsGreater:         isGreaterService,
-		IsLesser:          isLesserService,
-		Lesser:            lesserService,
-		Multiply:          multiplyService,
-		Output:            outputService,
-		ReadInformationID: readInformationIDService,
-		ReadSeparator:     readSeparatorService,
-		Round:             roundService,
-		Subtract:          subtractService,
-		Sum:               sumService,
+		Divide:                  divideService,
+		Greater:                 greaterService,
+		Input:                   inputService,
+		IsBetween:               isBetweenService,
+		IsGreater:               isGreaterService,
+		IsLesser:                isLesserService,
+		Lesser:                  lesserService,
+		Multiply:                multiplyService,
+		Output:                  outputService,
+		ReadInformationSequence: readInformationSequenceService,
+		ReadSeparator:           readSeparatorService,
+		Round:                   roundService,
+		Subtract:                subtractService,
+		Sum:                     sumService,
 	}
 
 	return newCollection, nil
@@ -333,20 +333,20 @@ type Collection struct {
 	// Public.
 	List []Service
 
-	Divide            Service
-	Greater           Service
-	Input             Service
-	IsBetween         Service
-	IsGreater         Service
-	IsLesser          Service
-	Lesser            Service
-	Multiply          Service
-	Output            Service
-	ReadInformationID Service
-	ReadSeparator     Service
-	Round             Service
-	Subtract          Service
-	Sum               Service
+	Divide                  Service
+	Greater                 Service
+	Input                   Service
+	IsBetween               Service
+	IsGreater               Service
+	IsLesser                Service
+	Lesser                  Service
+	Multiply                Service
+	Output                  Service
+	ReadInformationSequence Service
+	ReadSeparator           Service
+	Round                   Service
+	Subtract                Service
+	Sum                     Service
 }
 
 func (c *Collection) Boot() {
