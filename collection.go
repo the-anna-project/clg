@@ -19,6 +19,8 @@ import (
 	lesserclg "github.com/the-anna-project/clg/lesser"
 	multiplyclg "github.com/the-anna-project/clg/multiply"
 	outputclg "github.com/the-anna-project/clg/output"
+	passthroughfloat64clg "github.com/the-anna-project/clg/pass/through/float64"
+	passthroughstringclg "github.com/the-anna-project/clg/pass/through/string"
 	readinformationsequence "github.com/the-anna-project/clg/read/information/sequence"
 	readseparatorclg "github.com/the-anna-project/clg/read/separator"
 	roundclg "github.com/the-anna-project/clg/round"
@@ -228,6 +230,26 @@ func NewCollection(config CollectionConfig) (*Collection, error) {
 		}
 	}
 
+	var passThroughFloat64Service Service
+	{
+		passThroughFloat64Config := passthroughfloat64clg.DefaultServiceConfig()
+		passThroughFloat64Config.IDService = config.IDService
+		passThroughFloat64Service, err = passthroughfloat64clg.NewService(passThroughFloat64Config)
+		if err != nil {
+			return nil, maskAny(err)
+		}
+	}
+
+	var passThroughStringService Service
+	{
+		passThroughStringConfig := passthroughstringclg.DefaultServiceConfig()
+		passThroughStringConfig.IDService = config.IDService
+		passThroughStringService, err = passthroughstringclg.NewService(passThroughStringConfig)
+		if err != nil {
+			return nil, maskAny(err)
+		}
+	}
+
 	var readInformationSequenceService Service
 	{
 		readInformationSequenceConfig := readinformationsequence.DefaultServiceConfig()
@@ -298,6 +320,8 @@ func NewCollection(config CollectionConfig) (*Collection, error) {
 			lesserService,
 			multiplyService,
 			outputService,
+			passThroughFloat64Service,
+			passThroughStringService,
 			readInformationSequenceService,
 			readSeparatorService,
 			roundService,
@@ -314,6 +338,8 @@ func NewCollection(config CollectionConfig) (*Collection, error) {
 		Lesser:                  lesserService,
 		Multiply:                multiplyService,
 		Output:                  outputService,
+		PassThroughFloat64:      passThroughFloat64Service,
+		PassThroughString:       passThroughStringService,
 		ReadInformationSequence: readInformationSequenceService,
 		ReadSeparator:           readSeparatorService,
 		Round:                   roundService,
@@ -342,6 +368,8 @@ type Collection struct {
 	Lesser                  Service
 	Multiply                Service
 	Output                  Service
+	PassThroughFloat64      Service
+	PassThroughString       Service
 	ReadInformationSequence Service
 	ReadSeparator           Service
 	Round                   Service
