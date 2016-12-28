@@ -1,12 +1,12 @@
-// Package string implements github.com/the-anna-project/clg.Service and
-// provides a method to pass through the received string argument as it is. The
+// Package float64 implements github.com/the-anna-project/clg.Service and
+// provides a method to pass through the received float64 argument as it is. The
 // idea behind this pass through CLG is that it does not calculate or manipulate
 // any of the given arguments, but only returns them. The idea is that the
 // arguments being returned as they are received can be used to be forwarded in
 // a specific way based on the forwarding rules associated with a specific
 // behaviour ID. This can especially be useful in combination with the buffer
 // CLG.
-package string
+package float64
 
 import (
 	"sync"
@@ -61,7 +61,7 @@ func NewService(config ServiceConfig) (*Service, error) {
 		closer:   make(chan struct{}, 1),
 		metadata: map[string]string{
 			"id":   ID,
-			"kind": "pass/through/string",
+			"kind": "pass/through/float64",
 			"name": "clg",
 			"type": "service",
 		},
@@ -80,8 +80,8 @@ type Service struct {
 }
 
 func (s *Service) Action() interface{} {
-	return func(ctx context.Context, s string) string {
-		return s
+	return func(ctx context.Context, f float64) float64 {
+		return f
 	}
 }
 
